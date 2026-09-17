@@ -1,8 +1,21 @@
 # AI Project Management Assistant
 
-An enterprise-oriented API foundation for an AI Project Management Assistant. This initial version provides only a FastAPI service skeleton and health-check endpoint; AI, database, authentication, and external integrations will be added incrementally later.
+The Step 2 API foundation for an AI Project Management Assistant. This version deliberately uses only in-memory project data. It does not yet include SQL Server, LLMs, RAG, agents, or authentication.
 
-## Setup
+## Architecture
+
+Requests use a clear layered flow:
+
+```text
+Request -> API Router -> Service -> Repository -> In-memory data source
+```
+
+- `app/api/routes/` contains HTTP routes and HTTP-specific errors.
+- `app/services/` contains project use-case/business logic.
+- `app/repositories/` reads project data; it currently uses a mock in-memory list.
+- `app/schemas/` contains Pydantic models that define API data.
+
+## Setup and run
 
 Create and activate a virtual environment:
 
@@ -17,24 +30,50 @@ Install dependencies:
 pip install -r requirements.txt
 ```
 
-## Run the API
-
 ```bash
+pip install -r requirements.txt
 uvicorn app.main:app --reload
 ```
 
-The API will be available at `http://127.0.0.1:8000`.
+The API runs at `http://127.0.0.1:8000`.
 
-## Test the health endpoint
+## Endpoints
 
-With the server running, visit `http://127.0.0.1:8000/health` or run:
+| Method | Path | Description |
+| --- | --- | --- |
+| GET | `/` | API status message |
+| GET | `/health` | Health check |
+| GET | `/api/projects` | List projects |
+| GET | `/api/projects/{project_id}` | Get one project |
+
+Examples:
 
 ```bash
 curl http://127.0.0.1:8000/health
+curl http://127.0.0.1:8000/api/projects
+curl http://127.0.0.1:8000/api/projects/P001
 ```
 
-Expected response:
+The project list response is:
 
 ```json
-{"status": "ok"}
+{
+  "projects": [
+    {
+      "id": "P001",
+      "name": "پروژه نمونه نیروگاه",
+      "status": "در حال اجرا"
+    }
+  ]
+}
+```
+
+An unknown project returns HTTP 404 with a Persian error message.
+
+## Tests
+
+Run the tests with:
+
+```bash
+pytest
 ```

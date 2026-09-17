@@ -2,8 +2,12 @@
 
 from fastapi import FastAPI
 
+from app.api.routes.project import router as project_router
+
 
 app = FastAPI(title="AI Project Management Assistant API")
+
+app.include_router(project_router)
 
 
 @app.get("/")
